@@ -30,11 +30,6 @@ Dataset ini berisi informasi PHK dari berbagai perusahaan global yang diperoleh 
 - Validasi format tanggal, jumlah PHK, dan kategori industri
 - Bisa langsung digunakan untuk dashboard atau analisis tren PHK
 
-## 📎 File
-
-- `sql_queries/data_cleaning.sql`: Seluruh rangkaian query pembersihan
-- `data/layoffs_raw.csv`: Dataset sebelum dibersihkan (opsional)
-- `screenshots/before_after.png`: Contoh hasil sebelum dan sesudah cleaning
 
 ## 📌 Insight (jika dilanjut)
 
