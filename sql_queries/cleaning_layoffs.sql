@@ -1,137 +1,84 @@
-select * from cleaning_layoffs;
+-- Cek data awal
+SELECT * 
+FROM cleaning_layoffs;
 
-select
-*, 
-ROW_NUMBER() over (partition by company, location, industry, total_laid_off, date order by date) as row_num
-from cleaning_layoffs;
+-- Identifikasi duplikasi dengan ROW_NUMBER
+SELECT *, 
+       ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, date ORDER BY date) AS row_num
+FROM cleaning_layoffs;
 
-with dup_cleaning_layoffs as
-(
-select
-*, 
-ROW_NUMBER() over (partition by company, location, industry, total_laid_off, date order by date) as row_num
-from cleaning_layoffs
+-- Hapus duplikasi data
+WITH dup_cleaning_layoffs AS (
+    SELECT *, 
+           ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, date ORDER BY date) AS row_num
+    FROM cleaning_layoffs
 )
-delete
-from dup_cleaning_layoffs
-where row_num > 1;
+DELETE
+FROM dup_cleaning_layoffs
+WHERE row_num > 1;
 
-select * from cleaning_layoffs;
+-- Cek hasil setelah hapus duplikasi
+SELECT * 
+FROM cleaning_layoffs;
 
-select * from cleaning_layoffs;
-
-select
-company,
-trim(company)
-from cleaning_layoffs;
-
-update cleaning_layoffs
-set company = TRIM(company);
-
-select
-distinct industry
-from cleaning_layoffs
-order by industry;
-
-select *
-from cleaning_layoffs
-where industry like 'Crypto%'
-order by industry;
-
-update cleaning_layoffs
-set industry = 'Crypto'
-where industry like 'Crypto%';
-
-select
-distinct industry
-from cleaning_layoffs
-order by industry;
-
-select
-distinct country
-from cleaning_layoffs
-order by country;
-
-select
-distinct country,
-trim(trailing '.' from country)
-from cleaning_layoffs;
-
-update cleaning_layoffs
-set country = trim(trailing '.' from country)
-where country like 'United States%';
-
-select * from cleaning_layoffs;
-
-update cleaning_layoffs
-set industry
-
-select
-date,
-TRY_CONVERT(date, date, 103)
-from cleaning_layoffs;
-
-update cleaning_layoffs
-set date = TRY_CONVERT(date, date, 103);
-
+-- Trim spasi pada nama perusahaan
 UPDATE cleaning_layoffs
-SET layoff_date = NULL
-WHERE TRY_CONVERT(DATE, layoff_date, 103) IS NULL;
+SET company = TRIM(company);
 
-select * from cleaning_layoffs
-where total_laid_off = 'NULL';
+-- Normalisasi nama industri "Crypto%"
+UPDATE cleaning_layoffs
+SET industry = 'Crypto'
+WHERE industry LIKE 'Crypto%';
 
-update cleaning_layoffs
-set total_laid_off = null
-where total_laid_off = 'NULL';
+-- Bersihkan nama negara (hapus titik di akhir)
+UPDATE cleaning_layoffs
+SET country = TRIM(TRAILING '.' FROM country)
+WHERE country LIKE 'United States%';
 
-select * from cleaning_layoffs
-where total_laid_off is null;
+-- Ubah format kolom date menjadi tipe DATE
+UPDATE cleaning_layoffs
+SET date = TRY_CONVERT(date, date, 103);
 
-update cleaning_layoffs
-set percentage_laid_off = null
-where percentage_laid_off = 'NULL';
+-- Set kolom total_laid_off menjadi NULL jika 'NULL' string
+UPDATE cleaning_layoffs
+SET total_laid_off = NULL
+WHERE total_laid_off = 'NULL';
 
-update cleaning_layoffs
-set company = null
-where company = 'NULL';
+-- Set kolom percentage_laid_off menjadi NULL jika 'NULL' string
+UPDATE cleaning_layoffs
+SET percentage_laid_off = NULL
+WHERE percentage_laid_off = 'NULL';
 
-select * from cleaning_layoffs
-where percentage_laid_off is null;
+-- Set kolom company menjadi NULL jika 'NULL' string
+UPDATE cleaning_layoffs
+SET company = NULL
+WHERE company = 'NULL';
 
-update cleaning_layoffs
-set location= null
-where location= 'NULL';
+-- Set kolom location menjadi NULL jika 'NULL' string
+UPDATE cleaning_layoffs
+SET location = NULL
+WHERE location = 'NULL';
 
-update cleaning_layoffs
-set funds_raised_millions = NULL
-where funds_raised_millions = 'NULL';
+-- Set kolom funds_raised_millions menjadi NULL jika 'NULL' string
+UPDATE cleaning_layoffs
+SET funds_raised_millions = NULL
+WHERE funds_raised_millions = 'NULL';
 
-select * from cleaning_layoffs
-where industry is null or industry = '';
-
-select * from cleaning_layoffs
-where company = 'Airbnb';
-
-select *
-from cleaning_layoffs t1
-join cleaning_layoffs t2
-on t1.company = t2.company 
-where (t1.industry is null or t1.industry = '') and t2.industry is not null;
-
+-- Isi kolom industry yang kosong dari record lain yang sama company-nya
 UPDATE t1
 SET t1.industry = t2.industry
 FROM cleaning_layoffs t1
 JOIN cleaning_layoffs t2
     ON t1.company = t2.company
-WHERE t1.industry IS NULL
+WHERE (t1.industry IS NULL OR t1.industry = '')
   AND t2.industry IS NOT NULL;
 
-select * from cleaning_layoffs;
+-- Hapus baris yang total_laid_off & percentage_laid_off sama-sama NULL
+DELETE
+FROM cleaning_layoffs
+WHERE total_laid_off IS NULL
+  AND percentage_laid_off IS NULL;
 
-select * from cleaning_layoffs
-where total_laid_off is null and percentage_laid_off is null;
-
-delete
-from cleaning_layoffs
-where total_laid_off is null and percentage_laid_off is null;
+-- Cek hasil akhir data setelah cleaning
+SELECT * 
+FROM cleaning_layoffs;
